@@ -1,6 +1,7 @@
 package dev.vengateshm.userservice.security;
 
 import dev.vengateshm.userservice.filter.CustomAuthenticationFilter;
+import dev.vengateshm.userservice.filter.CustomAuthorizationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +14,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -38,12 +40,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests().antMatchers("/api/login/**").permitAll();// Happen by default in filter
         http.authorizeRequests()
                 .antMatchers(HttpMethod.GET, "/api/users/**")
-                .hasAnyAuthority("ROLE_USER");
+                .hasAnyAuthority("ROLE_USER","ROLE_ADMIN");
         http.authorizeRequests()
                 .antMatchers(HttpMethod.POST, "/api/user/save/**")
                 .hasAnyAuthority("ROLE_ADMIN");
         http.authorizeRequests().anyRequest().authenticated();
         http.addFilter(filter);
+        http.addFilterBefore(new CustomAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
     }
 
     @Bean
